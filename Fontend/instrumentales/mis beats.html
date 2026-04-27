@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mis Beats - Go Beats</title>
+
+  <!-- CSS BASE -->
+  <link rel="stylesheet" href="cssz/dashboard.css" />
+
+  <!-- CSS NUEVO -->
+  <link rel="stylesheet" href="cssz/mis-beats.css" />
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar active">
+    <h2>Go Beats</h2>
+
+    <nav class="side-nav">
+      <a href="home.html">Home</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="mis-beats.html" class="active">Mis Beats</a>
+      <a href="subirbeats.html">Subir beats</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <header class="header">
+      <h1>🎧 Mis Beats</h1>
+      <button id="logoutBtn">Cerrar sesión</button>
+    </header>
+
+    <section>
+      <h2>Mis producciones</h2>
+
+      <div id="beats-container" class="mis-beats-container"></div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+const API = "http://localhost:5000";
+
+let currentAudio = null;
+let currentBtn = null;
+
+// 🎧 PLAYER
+function reproducir(src, btn) {
+  if (currentAudio && currentBtn === btn && !currentAudio.paused) {
+    currentAudio.pause();
+    btn.textContent = "▶️ Escuchar";
+    return;
+  }
+
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+  if (currentBtn && currentBtn !== btn) {
+    currentBtn.textContent = "▶️ Escuchar";
+  }
+
+  currentAudio = new Audio(src);
+  currentBtn = btn;
+  btn.textContent = "⏸️ Pausar";
+
+  currentAudio.play().catch(() => {
+    btn.textContent = "▶️ Escuchar";
+    currentAudio = null;
+    currentBtn = null;
+  });
+
+  currentAudio.onended = () => {
+    btn.textContent = "▶️ Escuchar";
+    currentAudio = null;
+    currentBtn = null;
+  };
+}
+
+// 🔄 CARGAR BEATS
+async function cargarMisBeats() {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API}/my-beats`, {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error("No autorizado o error servidor");
+    }
+
+    const beats = await res.json();
+
+    console.log("MIS BEATS:", beats);
+
+    const container = document.getElementById("beats-container");
+
+    if (!beats.length) {
+      container.innerHTML = "<p style='opacity:.6'>No tenés beats todavía</p>";
+      return;
+    }
+
+    container.innerHTML = beats.map(b => {
+
+      // 🔥 YA VIENEN BIEN DESDE BACKEND
+      const cover = b.coverUrl;
+      const audio = b.fileUrl;
+
+      return `
+        <div class="mis-beat-card ${b.assigned ? "taken" : ""}">
+
+          <div class="mis-beat-cover">
+            <img src="${cover}" />
+
+            <div class="estado-badge ${b.assigned ? "estado-tomado" : "estado-disponible"}">
+              ${b.assigned ? "Tomado" : "Disponible"}
+            </div>
+          </div>
+
+          <div class="mis-beat-info">
+            <h3>${b.name}</h3>
+
+            <p>
+              ${b.assigned 
+                ? `Tomado por ${b.assignedTo || "productor"}`
+                : "Listo para usar"}
+            </p>
+
+            <div class="player">
+              ${!b.assigned 
+                ? `<button onclick="reproducir('${audio}', this)">▶️ Escuchar</button>`
+                : `<button disabled>🔒 No disponible</button>`
+              }
+            </div>
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) {
+    console.error("ERROR:", err);
+    document.getElementById("beats-container").innerHTML =
+      "<p>Error cargando beats</p>";
+  }
+}
+
+// 🔐 LOGOUT
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("token");
+  window.location.href = "index.html";
+};
+
+// 🚀 INICIAR
+cargarMisBeats();
+</script>
+
+</body>
+</html>

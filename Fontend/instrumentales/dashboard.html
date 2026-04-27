@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Panel - Go Beats</title>
+  <link rel="stylesheet" href="cssz/dashboard.css" />
+  <style>
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .quick-actions a {
+      padding: 15px 20px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0a66ff, #2f8cff);
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(10, 102, 255, 0.3);
+    }
+
+    .quick-actions a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(10, 102, 255, 0.5);
+    }
+
+    .beat-card-enhanced {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .beat-card-enhanced::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(102, 217, 255, 0.1), transparent);
+      pointer-events: none;
+    }
+
+    .beat-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .beat-actions button {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid rgba(102, 217, 255, 0.3);
+      border-radius: 6px;
+      background: rgba(102, 217, 255, 0.1);
+      color: #66d9ff;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .beat-actions button:hover {
+      background: rgba(102, 217, 255, 0.2);
+      border-color: #66d9ff;
+    }
+
+    .beat-actions button.delete:hover {
+      background: rgba(255, 69, 96, 0.2);
+      border-color: #ff4560;
+      color: #ff4560;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: rgba(10, 102, 255, 0.1);
+      border: 1px solid rgba(102, 217, 255, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card strong {
+      display: block;
+      font-size: 24px;
+      color: #66d9ff;
+      margin-bottom: 5px;
+    }
+
+    .stat-card small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .empty-state h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .refresh-btn {
+      padding: 8px 16px;
+      background: rgba(102, 217, 255, 0.15);
+      border: 1px solid rgba(102, 217, 255, 0.3);
+      border-radius: 6px;
+      color: #66d9ff;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .refresh-btn:hover {
+      background: rgba(102, 217, 255, 0.25);
+      border-color: #66d9ff;
+    }
+
+    .refresh-btn.loading {
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs button {
+      padding: 8px 16px;
+      border: 1px solid rgba(102, 217, 255, 0.3);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .filter-tabs button.active {
+      background: rgba(10, 102, 255, 0.3);
+      border-color: #66d9ff;
+      color: #66d9ff;
+    }
+
+    .filter-tabs button:hover {
+      border-color: #66d9ff;
+      color: #66d9ff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button id="sidebarHandle" class="sidebar-handle" type="button" aria-label="Abrir menu">☰</button>
+
+    <div class="brand-block">
+      <span class="brand-mark">GB</span>
+      <div>
+        <h2>Go Beats</h2>
+        <p>Mi Panel</p>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <a href="home.html">🏠 Explorer</a>
+      <a href="dashboard.html" class="active">🎧 Mis Beats</a>
+      <a href="subirbeats.html">⭐ Destacados / Subir</a>
+      <a href="admin-descargas.html" class="admin-only hidden">📥 Quién descargó</a>
+      <a href="admi.html" class="admin-only hidden">🛠️ Admi HTML</a>
+    </nav>
+
+    <div class="sidebar-note admin-only hidden">
+      <strong>Modo Admin</strong>
+      <span>Tienes acceso a herramientas avanzadas.</span>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="header">
+      <button id="toggleSidebar" type="button" aria-label="Abrir menu">☰</button>
+      <div>
+        <p class="eyebrow">Mi Catálogo</p>
+        <h1>📊 Mis Beats</h1>
+      </div>
+      <div class="header-actions">
+        <button class="refresh-btn" id="refreshBtn" title="Actualizar">🔄 Actualizar</button>
+        <span id="userBadge" class="user-badge">Cargando...</span>
+        <button id="logoutBtn" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <!-- ESTADÍSTICAS -->
+    <section class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <strong id="totalBeats">0</strong>
+        <small>Beats Totales</small>
+      </div>
+      <div class="stat-card">
+        <strong id="availableBeats">0</strong>
+        <small>Disponibles</small>
+      </div>
+      <div class="stat-card">
+        <strong id="takenBeats">0</strong>
+        <small>Tomados</small>
+      </div>
+    </section>
+
+    <!-- PANEL PRINCIPAL -->
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">Panel Personal</p>
+        <h2>Administra tus Beats</h2>
+        <p>Visualiza todos tus beats, su estado y las descargas que han recibido.</p>
+      </div>
+      <div class="hero-stat">
+        <strong id="beatCountBig">0</strong>
+        <span>beats subidos</span>
+      </div>
+    </section>
+
+    <!-- FILTROS Y BÚSQUEDA -->
+    <section class="filters-panel" aria-label="Filtros de beats">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <div class="search-box" style="flex: 1; min-width: 200px;">
+          <label for="searchInput">🔍 Buscar</label>
+          <input id="searchInput" type="search" placeholder="Nombre, género, BPM..." />
+        </div>
+        <button class="refresh-btn" id="refreshBtn2" title="Actualizar">🔄</button>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="available">Disponibles</button>
+        <button class="filter-btn" data-filter="taken">Tomados</button>
+      </div>
+    </section>
+
+    <!-- BEATS CONTAINER -->
+    <section class="beats-section">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">Tus Producciones</p>
+          <h2>Beats Personales</h2>
+        </div>
+        <a href="subirbeats.html" class="ghost-button">+ Subir Beat</a>
+      </div>
+
+      <div id="beats-status" class="status">Cargando tus beats...</div>
+      <div id="beats-container" class="beats-grid"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const API_URL = "http://localhost:5000";
+
+// DOM Elements
+const sidebar = document.getElementById("sidebar");
+const statusBox = document.getElementById("beats-status");
+const beatsContainer = document.getElementById("beats-container");
+const userBadge = document.getElementById("userBadge");
+const beatCountBig = document.getElementById("beatCountBig");
+const searchInput = document.getElementById("searchInput");
+const refreshBtn = document.getElementById("refreshBtn");
+const refreshBtn2 = document.getElementById("refreshBtn2");
+const filterBtns = document.querySelectorAll(".filter-btn");
+
+// STATE
+let usuarioActual = null;
+let beatsGlobal = [];
+let filterActual = "all";
+let isLoading = false;
+let currentAudio = null;
+let currentPlayBtn = null;
+
+// ===== FUNCIONES AUXILIARES =====
+function toggleSidebar() {
+  sidebar.classList.toggle("active");
+}
+
+function token() {
+  return localStorage.getItem("token");
+}
+
+function authHeaders(extra = {}) {
+  return { ...extra, Authorization: "Bearer " + token() };
+}
+
+function buildAssetUrl(path) {
+  if (!path) return "";
+  let value = String(path).replaceAll("\\", "/");
+  try {
+    value = decodeURIComponent(value);
+  } catch {}
+  value = value.replace(/uploadsaudio[\u0000-\u001f\u007f]*/i, "uploads/audio/");
+  value = value.replace(/uploadsimages[\u0000-\u001f\u007f]*/i, "uploads/images/");
+  return value.startsWith("http") ? value : `${API_URL}/${value.replace(/^\/+/, "")}`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+// ===== ESTADÍSTICAS =====
+function updateStats() {
+  const total = beatsGlobal.length;
+  const available = beatsGlobal.filter(b => !b.assigned).length;
+  const taken = beatsGlobal.filter(b => b.assigned).length;
+
+  document.getElementById("totalBeats").textContent = total;
+  document.getElementById("availableBeats").textContent = available;
+  document.getElementById("takenBeats").textContent = taken;
+  document.getElementById("beatCountBig").textContent = total;
+}
+
+// ===== RENDERIZAR BEATS =====
+function renderBeats() {
+  const q = normalize(searchInput.value);
+  
+  let visibles = beatsGlobal.filter((beat) => {
+    const haystack = normalize(`${beat.name} ${beat.genre} ${beat.mood} ${beat.key} ${beat.bpm}`);
+    return !q || haystack.includes(q);
+  });
+
+  // Aplicar filtro
+  if (filterActual === "available") {
+    visibles = visibles.filter(b => !b.assigned);
+  } else if (filterActual === "taken") {
+    visibles = visibles.filter(b => b.assigned);
+  }
+
+  if (!visibles.length) {
+    beatsContainer.innerHTML = "";
+    if (beatsGlobal.length === 0) {
+      statusBox.innerHTML = `
+        <div class="empty-state">
+          <h3>📭 Aún no tienes beats</h3>
+          <p>Comienza a subir tus producciones para que aparezcan aquí.</p>
+          <a href="subirbeats.html" class="ghost-button" style="display: inline-block; margin-top: 15px;">
+            ⬆️ Subir Beat
+          </a>
+        </div>
+      `;
+    } else {
+      statusBox.textContent = "No se encontraron resultados.";
+    }
+    return;
+  }
+
+  statusBox.textContent = "";
+
+  beatsContainer.innerHTML = visibles.map((beat) => {
+    const cover = buildAssetUrl(beat.coverUrl);
+    const audio = buildAssetUrl(beat.fileUrl);
+    const isTaken = Boolean(beat.assigned);
+
+    return `
+      <article class="beat-card personal beat-card-enhanced ${isTaken ? "is-taken" : ""}">
+        <div class="beat-cover">
+          ${cover ? `<img src="${cover}" alt="Portada de ${escapeHtml(beat.name)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22300%22 height=%22300%22%3E%3Crect fill=%22%230a1830%22 width=%22300%22 height=%22300%22/%3E%3C/svg%3E'">` : ""}
+          <div class="beat-status ${isTaken ? "taken" : "available"}">
+            ${isTaken ? `✓ Tomado por ${escapeHtml(beat.assignedTo || "productor")}` : "Disponible"}
+          </div>
+        </div>
+
+        <div class="beat-info">
+          <h3>${escapeHtml(beat.name || "Beat sin nombre")}</h3>
+          <div class="beat-meta-simple">
+            <span>🎵 ${escapeHtml(beat.genre || "?")}${beat.mood ? ` • ${escapeHtml(beat.mood)}` : ""}</span>
+            <span>🎚️ ${beat.bpm || "?"} BPM</span>
+            <span>🎹 ${escapeHtml(beat.key || "?")}</span>
+          </div>
+          
+          <div class="beat-actions">
+            <button class="play-btn" onclick="playAudio('${audio}', this)">▶️ Escuchar</button>
+            ${!isTaken ? `<button class="delete" onclick="deleteBeat('${beat._id}', this)">🗑️ Eliminar</button>` : `<button disabled>🔒 No editable</button>`}
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+// ===== REPRODUCIR AUDIO =====
+function stopCurrentAudio() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+    currentAudio = null;
+  }
+  if (currentPlayBtn) {
+    currentPlayBtn.textContent = "▶️ Escuchar";
+    currentPlayBtn = null;
+  }
+}
+
+function playAudio(audioUrl, btn) {
+  if (!audioUrl) {
+    alert("Audio no disponible");
+    return;
+  }
+
+  // Si clickea el mismo botón estando en reproducción, pausamos.
+  if (currentAudio && currentPlayBtn === btn && !currentAudio.paused) {
+    currentAudio.pause();
+    btn.textContent = "▶️ Escuchar";
+    return;
+  }
+
+  // Si ya había otro audio sonando, lo detenemos antes de iniciar el nuevo.
+  if (!currentAudio || currentAudio.src !== audioUrl) {
+    stopCurrentAudio();
+    currentAudio = new Audio(audioUrl);
+    currentAudio.onended = () => {
+      if (currentPlayBtn) currentPlayBtn.textContent = "▶️ Escuchar";
+      currentAudio = null;
+      currentPlayBtn = null;
+    };
+  } else {
+    currentAudio.currentTime = currentAudio.currentTime || 0;
+  }
+
+  currentAudio.play().then(() => {
+    btn.textContent = "⏸️ Pausar";
+    currentPlayBtn = btn;
+  }).catch(() => {
+    alert("No se pudo reproducir el audio. Verifica que el archivo sea válido.");
+    stopCurrentAudio();
+  });
+}
+
+// ===== ELIMINAR BEAT =====
+async function deleteBeat(beatId, btn) {
+  if (!confirm("¿Seguro que quieres eliminar este beat? Esta acción no se puede deshacer.")) {
+    return;
+  }
+
+  try {
+    btn.textContent = "Eliminando...";
+    btn.disabled = true;
+
+    const res = await fetch(`${API_URL}/beats/${beatId}`, {
+      method: "DELETE",
+      headers: authHeaders()
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar");
+
+    // Remover de la lista
+    beatsGlobal = beatsGlobal.filter(b => b._id !== beatId);
+    updateStats();
+    renderBeats();
+    alert("Beat eliminado correctamente.");
+  } catch (err) {
+    alert("Error al eliminar el beat: " + err.message);
+    btn.textContent = "🗑️ Eliminar";
+    btn.disabled = false;
+  }
+}
+
+// ===== CARGAR BEATS =====
+async function cargarBeats() {
+  if (isLoading) return;
+  isLoading = true;
+  
+  refreshBtn.classList.add("loading");
+  refreshBtn2.classList.add("loading");
+  statusBox.textContent = "Cargando tus beats...";
+
+  try {
+    const res = await fetch(`${API_URL}/my-beats`, {
+      headers: authHeaders()
+    });
+
+    if (!res.ok) throw new Error("No se pudieron cargar los beats");
+
+    beatsGlobal = await res.json();
+    updateStats();
+    renderBeats();
+  } catch (err) {
+    console.error(err);
+    beatsContainer.innerHTML = "";
+    statusBox.innerHTML = `
+      <div style="text-align: center; color: #ff4560; padding: 20px;">
+        <p>⚠️ Error conectando con el servidor</p>
+        <small>Verifica que el backend esté ejecutándose en localhost:5000</small>
+      </div>
+    `;
+  } finally {
+    isLoading = false;
+    refreshBtn.classList.remove("loading");
+    refreshBtn2.classList.remove("loading");
+  }
+}
+
+// ===== VERIFICAR SESIÓN =====
+async function proteger() {
+  if (!token()) {
+    window.location.replace("index.html");
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Sesión inválida");
+
+    usuarioActual = await res.json();
+    userBadge.textContent = usuarioActual.role === "admin" 
+      ? `👤 Admin: ${usuarioActual.email}` 
+      : `👤 ${usuarioActual.email}`;
+
+    document.body.dataset.role = usuarioActual.role;
+
+    if (usuarioActual.role === "admin") {
+      document.querySelectorAll(".admin-only").forEach((el) => el.classList.remove("hidden"));
+    }
+
+    return true;
+  } catch {
+    localStorage.removeItem("token");
+    window.location.replace("index.html");
+    return false;
+  }
+}
+
+// ===== EVENT LISTENERS =====
+document.getElementById("toggleSidebar").onclick = toggleSidebar;
+document.getElementById("sidebarHandle").onclick = toggleSidebar;
+
+refreshBtn.onclick = cargarBeats;
+refreshBtn2.onclick = cargarBeats;
+
+searchInput.addEventListener("input", renderBeats);
+
+// Filtros
+filterBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    filterBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    filterActual = btn.dataset.filter;
+    renderBeats();
+  });
+});
+
+document.getElementById("logoutBtn").onclick = () => {
+  localStorage.removeItem("token");
+  window.location.replace("index.html");
+};
+
+// ===== INICIAR =====
+(async () => {
+  const ok = await proteger();
+  if (ok) cargarBeats();
+  
+  // Auto-refresh cada 30 segundos
+  setInterval(cargarBeats, 30000);
+})();
+</script>
+
+</body>
+</html>

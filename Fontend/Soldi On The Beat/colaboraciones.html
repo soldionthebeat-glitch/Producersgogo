@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Colaboraciones - Soldi On The Beat</title>
+  <link rel="stylesheet" href="colaboraciones.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="nav">
+    <h1 class="logo">Soldi On The Beat</h1>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="soldi.html">Inicio</a></li>
+        <li><a href="trabajos.html">Trabajos</a></li>
+        <li><a href="sobre.html">Sobre Mi</a></li>
+        <li><a href="colaboraciones.html" aria-current="page">Colaboraciones</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <h1>Colaboraciones</h1>
+
+    <p class="desc">
+      He trabajado con distintos artistas dentro del movimiento urbano,
+      desarrollando sonido y participando en proyectos reales.
+    </p>
+
+    <div class="artistas">
+      <div class="artista">BERRU</div>
+      <div class="artista">BLACK PANTER AL2</div>
+      <div class="artista">FUCK LUV</div>
+      <div class="artista">LIL VAN</div>
+      <div class="artista">GERMANHMUSSIC</div>
+      <div class="artista">LUXA</div>
+      <div class="artista">CUSO</div>
+      <div class="artista">NEHUE</div>
+    </div>
+
+    <section class="bloque">
+      <h2>Rol en las colaboraciones</h2>
+
+      <p>
+        Mi participación no se limita a hacer beats.
+        Trabajo en el desarrollo del sonido, dirección musical
+        y construcción del track completo.
+      </p>
+
+      <p>
+        Cada colaboración busca generar un resultado con identidad,
+        no algo genérico.
+      </p>
+    </section>
+
+    <section class="colaboraciones-carrusel">
+  <h2>Artistas con los que he colaborado</h2>
+  <p class="intro">
+    Aquí algunos de los artistas con los que he trabajado, mostrando su imagen y nombre para que puedas conocer mejor el talento con el que comparto proyectos.
+  </p>
+
+  <div class="carrusel-container">
+    <button class="btn-prev" aria-label="Anterior">&#10094;</button>
+    <div class="carrusel-track">
+      <div class="artista-card">
+        <img src="ruta/a/foto-berru.jpg" alt="BERRU" />
+        <div class="nombre-artista">BERRU</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-blackpanter.jpg" alt="BLACK PANTER AL2" />
+        <div class="nombre-artista">BLACK PANTER AL2</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-fuckluv.jpg" alt="FUCK LUV" />
+        <div class="nombre-artista">FUCK LUV</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-lilvan.jpg" alt="LIL VAN" />
+        <div class="nombre-artista">LIL VAN</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-germanhmussic.jpg" alt="GERMAN" />
+        <div class="nombre-artista">GERMAN</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-luxa.jpg" alt="LUXA" />
+        <div class="nombre-artista">LUXA</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-cuso.jpg" alt="CUSO" />
+        <div class="nombre-artista">CUSO</div>
+      </div>
+      <div class="artista-card">
+        <img src="ruta/a/foto-nehue.jpg" alt="NEHUE" />
+        <div class="nombre-artista">NEHUE</div>
+      </div>
+    </div>
+    <button class="btn-next" aria-label="Siguiente">&#10095;</button>
+  </div>
+</section>
+
+
+  </main>
+<!-- ... tu contenido HTML ... -->
+
+<script>
+  const track = document.querySelector('.carrusel-track');
+  const prevBtn = document.querySelector('.btn-prev');
+  const nextBtn = document.querySelector('.btn-next');
+
+  let position = 0;
+  const cardWidth = 165; // 140px width + 25px gap
+  const visibleCards = Math.floor(document.querySelector('.carrusel-container').offsetWidth / cardWidth);
+  const totalCards = document.querySelectorAll('.artista-card').length;
+  const maxPosition = totalCards - visibleCards;
+
+  function updateCarousel() {
+    track.style.transform = `translateX(${-position * cardWidth}px)`;
+    prevBtn.disabled = position === 0;
+    nextBtn.disabled = position >= maxPosition;
+  }
+
+  prevBtn.addEventListener('click', () => {
+    if (position > 0) {
+      position--;
+      updateCarousel();
+    }
+  });
+
+  nextBtn.addEventListener('click', () => {
+    if (position < maxPosition) {
+      position++;
+      updateCarousel();
+    }
+  });
+
+  // Inicializar estado
+  updateCarousel();
+
+  // Ajustar visibleCards y maxPosition al redimensionar ventana
+  window.addEventListener('resize', () => {
+    const newVisibleCards = Math.floor(document.querySelector('.carrusel-container').offsetWidth / cardWidth);
+    if (newVisibleCards !== visibleCards) {
+      position = 0; // reset position on resize
+      updateCarousel();
+    }
+  });
+</script>
+
+</body>
+</html>
+
+  
+</body>
+</html>

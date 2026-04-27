@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Go Beats - Home</title>
+  <link rel="stylesheet" href="cssz/dashboard.css" />
+  <link rel="stylesheet" href="../assets/modal-obtener.css" />
+  <link rel="stylesheet" href="../assets/reproductor-beats.css" />
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar active" id="sidebar">
+    <button id="sidebarHandle" class="sidebar-handle" type="button" aria-label="Abrir menu">☰</button>
+
+    <div class="brand-block">
+      <span class="brand-mark">GB</span>
+      <div>
+        <h2>Go Beats</h2>
+        <p>Catálogo general</p>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <a href="home.html" class="active">🏠 Explorer</a>
+      <a href="dashboard.html">🎧 Mis Beats</a>
+      <a href="subirbeats.html">⭐ Destacados / Subir</a>
+      <a href="admin-descargas.html" class="admin-only hidden">📥 Quién descargó</a>
+      <a href="admi.html" class="admin-only hidden">🛠️ Admi HTML</a>
+    </nav>
+
+  </aside>
+
+  <main class="main" id="main">
+    <header class="header">
+      <button id="toggleSidebar" type="button" aria-label="Abrir menu">☰</button>
+      <div>
+        <p class="eyebrow">Explorer</p>
+        <h1>Todos los beats</h1>
+      </div>
+      <div class="header-actions">
+        <span id="userBadge" class="user-badge">Cargando...</span>
+        <button id="logoutBtn" type="button">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">Vista general</p>
+        <h2>Catálogo completo del sello</h2>
+        <p>Aquí aparecen todos los beats: disponibles y también los que ya fueron tomados por productores.</p>
+      </div>
+      <div class="hero-stat">
+        <strong id="beatCount">0</strong>
+        <span>beats totales</span>
+      </div>
+    </section>
+
+    <section class="filters-panel" aria-label="Filtros de beats">
+      <div class="search-box">
+        <label for="searchInput">Buscar</label>
+        <input id="searchInput" type="search" placeholder="Nombre, productor, estilo..." />
+      </div>
+    </section>
+
+    <section class="beats-section">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">General</p>
+          <h2>Beats del sello</h2>
+        </div>
+      </div>
+
+      <div id="beats-status" class="status">Cargando beats...</div>
+      <div id="beats-container" class="beats-grid explorer-grid"></div>
+    </section>
+  </main>
+</div>
+
+<script>
+const API_URL = "http://localhost:5000";
+const sidebar = document.getElementById("sidebar");
+const statusBox = document.getElementById("beats-status");
+const beatsContainer = document.getElementById("beats-container");
+const userBadge = document.getElementById("userBadge");
+const beatCount = document.getElementById("beatCount");
+const searchInput = document.getElementById("searchInput");
+
+let usuarioActual = null;
+let beatsGlobal = [];
+let currentPreviewAudio = null;
+let currentPreviewBtn = null;
+
+document.getElementById("toggleSidebar").onclick = () => sidebar.classList.toggle("active");
+document.getElementById("sidebarHandle").onclick = () => sidebar.classList.toggle("active");
+
+function token() {
+  return localStorage.getItem("token");
+}
+
+function authHeaders(extra = {}) {
+  return { ...extra, Authorization: "Bearer " + token() };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildAssetUrl(path) {
+  if (!path) return "";
+  let value = String(path).replaceAll("\\", "/");
+  try {
+    value = decodeURIComponent(value);
+  } catch {}
+  value = value.replace(/uploadsaudio[\u0000-\u001f\u007f]*/i, "uploads/audio/");
+  value = value.replace(/uploadsimages[\u0000-\u001f\u007f]*/i, "uploads/images/");
+  return value.startsWith("http") ? value : `${API_URL}/${value.replace(/^\/+/, "")}`;
+}
+
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function stopPreview() {
+  if (currentPreviewAudio) {
+    currentPreviewAudio.pause();
+    currentPreviewAudio.currentTime = 0;
+    currentPreviewAudio = null;
+  }
+  if (currentPreviewBtn) {
+    currentPreviewBtn.textContent = "▶️ Reproducir";
+    currentPreviewBtn = null;
+  }
+}
+
+function togglePreview(audioUrl, btn) {
+  if (!audioUrl) return;
+
+  if (currentPreviewAudio && currentPreviewBtn === btn && !currentPreviewAudio.paused) {
+    currentPreviewAudio.pause();
+    btn.textContent = "▶️ Reproducir";
+    return;
+  }
+
+  if (!currentPreviewAudio || currentPreviewAudio.src !== audioUrl) {
+    stopPreview();
+    currentPreviewAudio = new Audio(audioUrl);
+    currentPreviewAudio.onended = () => {
+      if (currentPreviewBtn) currentPreviewBtn.textContent = "▶️ Reproducir";
+      currentPreviewAudio = null;
+      currentPreviewBtn = null;
+    };
+  }
+
+  currentPreviewAudio.play().then(() => {
+    btn.textContent = "⏸️ Pausar";
+    currentPreviewBtn = btn;
+  }).catch(() => {
+    stopPreview();
+  });
+}
+
+function togglePreviewFromBtn(btn) {
+  const audioUrl = btn.dataset.audio || "";
+  togglePreview(audioUrl, btn);
+}
+
+async function proteger() {
+  if (!token()) {
+    window.location.replace("index.html");
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Sesión inválida");
+
+    usuarioActual = await res.json();
+    userBadge.textContent = usuarioActual.role === "admin" ? `Admin: ${usuarioActual.email}` : `User: ${usuarioActual.email}`;
+    document.body.dataset.role = usuarioActual.role;
+
+    if (usuarioActual.role === "admin") {
+      document.querySelectorAll(".admin-only").forEach((el) => el.classList.remove("hidden"));
+    }
+
+    return true;
+  } catch {
+    localStorage.removeItem("token");
+    window.location.replace("index.html");
+    return false;
+  }
+}
+
+function renderBeats() {
+  const query = normalize(searchInput.value);
+  const visibles = beatsGlobal.filter((beat) => {
+    const text = normalize(`${beat.name} ${beat.producer} ${beat.genre} ${beat.mood} ${beat.key} ${beat.assignedTo}`);
+    return !query || text.includes(query);
+  });
+
+  beatCount.textContent = visibles.length;
+
+  if (!visibles.length) {
+    beatsContainer.innerHTML = "";
+    statusBox.textContent = "No hay beats para mostrar.";
+    return;
+  }
+
+  statusBox.textContent = "";
+  beatsContainer.innerHTML = visibles.map((beat) => {
+    const cover = buildAssetUrl(beat.coverUrl);
+    const audio = buildAssetUrl(beat.fileUrl);
+    const isTaken = Boolean(beat.assigned);
+
+    return `
+      <article class="beat-card explorer-card ${isTaken ? "is-taken" : ""}">
+        <div class="beat-cover explorer-cover">
+          ${cover ? `<img src="${cover}" alt="Portada de ${escapeHtml(beat.name)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22600%22%3E%3Crect fill=%22%230a1830%22 width=%22600%22 height=%22600%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2366d9ff%22 font-size=%2232%22 font-family=%22Arial%22%3ENo Cover%3C/text%3E%3C/svg%3E'">` : ""}
+          ${isTaken ? `<span class="taken-badge">Tomado</span>` : `<span class="taken-badge available">Disponible</span>`}
+        </div>
+        <div class="beat-info explorer-info">
+          <div class="beat-heading">
+            <h3>${escapeHtml(beat.name || "Beat sin nombre")}</h3>
+            <span>${escapeHtml(beat.genre || "Beat")}</span>
+          </div>
+          <p>Prod. ${escapeHtml(beat.producer || "Desconocido")}</p>
+          ${isTaken ? `<p>Tomado por ${escapeHtml(beat.assignedTo || "productor")}</p>` : ""}
+          <div class="beat-meta">
+            <span>${beat.bpm ? escapeHtml(beat.bpm) + " BPM" : "BPM libre"}</span>
+            <span>${escapeHtml(beat.key || "Sin nota")}</span>
+            <span>${escapeHtml(beat.mood || "Sin mood definido")}</span>
+          </div>
+          ${!isTaken && audio
+            ? `<button type="button" class="play-preview-btn" data-audio="${audio}" onclick="togglePreviewFromBtn(this)">▶️ Reproducir</button>`
+            : `<p class="status">No disponible</p>`
+          }
+          <div class="beat-actions">
+            ${isTaken ? `<button type="button" disabled>No disponible</button>` : `<button class="btn-obtener ghost-button" data-beat-name="${escapeHtml(beat.name)}" data-beat-producer="${escapeHtml(beat.producer)}" data-beat-file="${escapeHtml(audio)}" data-beat-id="${beat._id || ''}">Tomar</button>`}
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+async function cargarBeats() {
+  statusBox.textContent = "Cargando beats...";
+
+  try {
+    const res = await fetch(`${API_URL}/all-beats`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("No se pudieron cargar los beats");
+
+    beatsGlobal = await res.json();
+    renderBeats();
+  } catch (err) {
+    console.error(err);
+    statusBox.textContent = "No se pudo cargar el catálogo de beats.";
+  }
+}
+
+searchInput.addEventListener("input", renderBeats);
+
+document.getElementById("logoutBtn").onclick = () => {
+  stopPreview();
+  localStorage.removeItem("token");
+  window.location.replace("index.html");
+};
+
+(async () => {
+  const ok = await proteger();
+  if (ok) cargarBeats();
+})();
+</script>
+
+<script src="../assets/modal-obtener.js"></script>
+
+</body>
+</html>

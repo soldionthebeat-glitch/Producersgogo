@@ -1,0 +1,338 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>El 23 - Productor Musical</title>
+  <link rel="stylesheet" href="el23.css" />
+  <link rel="stylesheet" href="../assets/modal-obtener.css" />
+  <link rel="stylesheet" href="../assets/reproductor-beats.css" />
+  <style>
+    /* Animaciones adicionales para El 23 */
+    @keyframes slideInFromLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes glow {
+      0%, 100% {
+        box-shadow: 0 0 8px var(--turquoise-muted);
+      }
+      50% {
+        box-shadow: 0 0 20px var(--turquoise);
+      }
+    }
+
+    .hero-content {
+      animation: slideInFromLeft 0.8s ease-out;
+    }
+
+    .hero-content h1 {
+      animation: slideInFromLeft 0.8s ease-out 0.1s backwards;
+    }
+
+    .hero-content p {
+      animation: slideInFromLeft 0.8s ease-out 0.2s backwards;
+    }
+
+    .about-box {
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .about-box:nth-child(1) { animation-delay: 0.1s; }
+    .about-box:nth-child(2) { animation-delay: 0.2s; }
+    .about-box:nth-child(3) { animation-delay: 0.3s; }
+    .about-box:nth-child(4) { animation-delay: 0.4s; }
+
+    .card {
+      animation: scaleIn 0.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+    .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(5) { animation-delay: 0.5s; }
+    .card:nth-child(6) { animation-delay: 0.6s; }
+
+    .bloque-contenido {
+      display: flex;
+      gap: 50px;
+      align-items: center;
+      max-width: 900px;
+      margin: 80px auto;
+      padding: 0 20px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .bloque-contenido .texto {
+      flex: 1;
+    }
+
+    .bloque-contenido .imagen-container {
+      flex: 1;
+      position: relative;
+    }
+
+    .bloque-contenido img {
+      width: 100%;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 40px rgba(26, 188, 156, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .bloque-contenido img:hover {
+      transform: scale(1.03);
+      box-shadow: 0 15px 50px rgba(26, 188, 156, 0.3);
+    }
+
+    .bloque-contenido p {
+      color: var(--text-light);
+      font-size: 1.1rem;
+      line-height: 1.8;
+      margin-bottom: 15px;
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .bloque-contenido p:nth-of-type(1) { animation-delay: 0.1s; }
+    .bloque-contenido p:nth-of-type(2) { animation-delay: 0.2s; }
+    .bloque-contenido p:nth-of-type(3) { animation-delay: 0.3s; }
+    .bloque-contenido p:nth-of-type(4) { animation-delay: 0.4s; }
+    .bloque-contenido p:nth-of-type(5) { animation-delay: 0.5s; }
+
+    .stats-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin: 60px auto;
+      max-width: 900px;
+      padding: 0 20px;
+    }
+
+    .stat-box {
+      background: var(--panel-bg);
+      border-radius: var(--radius);
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: var(--shadow-soft);
+      animation: scaleIn 0.6s ease-out forwards;
+      opacity: 0;
+    }
+
+    .stat-box:nth-child(1) { animation-delay: 0.1s; }
+    .stat-box:nth-child(2) { animation-delay: 0.2s; }
+    .stat-box:nth-child(3) { animation-delay: 0.3s; }
+
+    .stat-box .number {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--turquoise);
+      text-shadow: 0 0 8px var(--turquoise-muted);
+    }
+
+    .stat-box .label {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 8px;
+      font-weight: 600;
+    }
+
+    .cta-section {
+      text-align: center;
+      margin: 80px 20px;
+      padding: 40px;
+      background: var(--panel-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .cta-section h2 {
+      color: var(--turquoise);
+      font-size: 2rem;
+      margin-bottom: 15px;
+      text-shadow: 0 0 8px var(--turquoise-muted);
+    }
+
+    .cta-section p {
+      color: var(--text-light);
+      font-size: 1.1rem;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+
+    .btn-obtener {
+      background-color: var(--turquoise);
+      color: var(--bg);
+      padding: 14px 32px;
+      font-weight: 700;
+      border-radius: 20px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      box-shadow: 0 6px 20px rgba(26, 188, 156, 0.4);
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .btn-obtener:hover {
+      background-color: var(--turquoise-light);
+      box-shadow: 0 8px 30px rgba(26, 188, 156, 0.6);
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .bloque-contenido {
+        flex-direction: column;
+        gap: 30px;
+        margin: 50px auto;
+      }
+
+      .stats-container {
+        grid-template-columns: 1fr;
+      }
+
+      .cta-section {
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <h2 class="logo">El 23</h2>
+  <nav>
+    <a href="index.html" aria-current="page">Inicio</a>
+    <a href="trabajo.html">Beats</a>
+    <a href="sobre.html">Sobre mÃ­</a>
+    <a href="contacto.html">Contacto</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content" role="banner">
+    <h1>EL 23</h1>
+    <p>Productor con identidad sonora Ãºnica</p>
+  </div>
+</section>
+
+<!-- SOBRE -->
+<section class="bloque-contenido">
+  <div class="texto">
+    <h2 style="color: var(--turquoise); font-size: 2rem; margin-bottom: 25px; text-shadow: 0 0 8px var(--turquoise-muted);">Â¿QuiÃ©n soy?</h2>
+    <p>
+      Soy El 23, un productor argentino enfocado en crear universos sonoros con identidad propia. Mi mÃºsica nace de la mÃ­stica, entendiendo cada beat como una herramienta de <strong>energÃ­a, lenguaje y experiencia</strong>.
+    </p>
+    <p>
+      Mis producciones no siguen tendencias, sino que construyen ambientes autÃ©nticos que conectan emocionalmente con quien las escucha. Cada elemento sonoro tiene un propÃ³sito especÃ­fico dentro de la composiciÃ³n.
+    </p>
+    <p>
+      Trabajo tanto en producciÃ³n de beats como en mezcla y mastering profesional, llevando cada proyecto a su mÃ¡xima calidad. Mi objetivo es revelar la <strong>esencia</strong> de cada idea musical.
+    </p>
+  </div>
+  <div class="imagen-container">
+    <img src="../EL23_BRAND_PACK/diseno con fondon.png" alt="El 23 - Productor" />
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-container">
+  <div class="stat-box">
+    <div class="number">100+</div>
+    <div class="label">Beats Producidos</div>
+  </div>
+  <div class="stat-box">
+    <div class="number">50K+</div>
+    <div class="label">Streams Acumulados</div>
+  </div>
+  <div class="stat-box">
+    <div class="number">15+</div>
+    <div class="label">Artistas Colaborativos</div>
+  </div>
+</section>
+
+<!-- SERVICIOS -->
+<section class="about">
+  <h2>Especialidades</h2>
+  <div class="about-container">
+    <div class="about-box">
+      <h3>ðŸŽµ ProducciÃ³n de Beats</h3>
+      <p>CreaciÃ³n de instrumentales originales con sonido diferenciado, adaptados al estilo y proyecto de cada artista.</p>
+    </div>
+    <div class="about-box">
+      <h3>ðŸŽšï¸ Mezcla Profesional</h3>
+      <p>Balance y claridad en cada elemento de la producciÃ³n, logrando un sonido limpio y profesional.</p>
+    </div>
+    <div class="about-box">
+      <h3>ðŸ”Š Mastering</h3>
+      <p>OptimizaciÃ³n final de tu mÃºsica para que suene perfecta en todas las plataformas y dispositivos.</p>
+    </div>
+    <div class="about-box">
+      <h3>ðŸŽ¼ ComposiciÃ³n</h3>
+      <p>Desarrollo de ideas musicales desde cero, construyendo la estructura y melodÃ­a de tus proyectos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>Descubre mis Beats</h2>
+  <p>Explora mi catÃ¡logo completo de producciones y encuentra el beat perfecto para tu proyecto.</p>
+  <a href="trabajo.html" class="btn-obtener">Ver Beats</a>
+</section>
+
+<!-- MODAL Y SCRIPTS -->
+<script src="../assets/modal-obtener.js"></script>
+<script src="../assets/reproductor-beats.js"></script>
+
+</body>
+</html>
+

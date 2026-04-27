@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+<head>
+  <meta charset="UTF-8">
+  <title>Contacto - ProducersGo</title>
+  <link rel="stylesheet" href="form.css">
+  <link rel="icon" href="/img/logo de pestana .png">
+</head>
+<body>
+  <div class="bg-anim"></div>
+
+<header class="header">
+  <h1>ProducersGo</h1>
+</header>
+
+<section class="hero">
+  <h2>Empezá a trabajar tu sonido <span>con nosotros</span></h2>
+  <p>Completá el formulario y te respondemos para ayudarte a avanzar.</p>
+</section>
+
+<section class="form-section">
+
+  <form class="formulario" id="formulario">
+
+    <div class="grid-form">
+
+      <div class="input-group">
+        <label>Nombre</label>
+        <input type="text" name="nombre" placeholder="Tu nombre" required>
+      </div>
+
+      <div class="input-group">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Tu email" required>
+      </div>
+
+    </div>
+
+    <div class="input-group">
+      <label>¿Qué tipo de perfil sos?</label>
+      <select name="perfil" required>
+        <option value="">Seleccionar</option>
+        <option>Productor</option>
+        <option>Artista</option>
+        <option>Sello Discográfico</option>
+        <option>Tercero / Marca</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>¿En qué aspecto estás interesado?</label>
+      <select name="servicio" required>
+        <option value="">Seleccionar</option>
+        <option>Mix & Feedback</option>
+        <option>Producción Musical</option>
+        <option>Mentorías</option>
+        <option>Distribución Digital</option>
+        <option>Branding para Productores</option>
+        <option>Marketing Musical</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Contanos sobre vos</label>
+      <textarea name="mensaje" placeholder="Qué hacés, tu nivel, qué buscás lograr..." required></textarea>
+    </div>
+
+    <button type="submit" class="btn" id="btnEnviar">Enviar solicitud</button>
+
+    <!-- MENSAJE -->
+    <p id="msg" style="display:none; margin-top:15px; color:#4da3ff; text-align:center;">
+      Mensaje enviado correctamente 🚀
+    </p>
+
+  </form>
+
+</section>
+
+<section class="cta">
+  <h2>Tu próximo nivel empieza con una decisión</h2>
+</section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+  emailjs.init("6eWG2SK48quvIIAg_");
+
+  const form = document.getElementById("formulario");
+  const btn = document.getElementById("btnEnviar");
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    btn.innerText = "Enviando...";
+    btn.disabled = true;
+
+    // 🔥 TEMPLATE FORZADO DESDE JS
+    const data = {
+      nombre: form.nombre.value,
+      email: form.email.value,
+      perfil: form.perfil.value,
+      servicio: form.servicio.value,
+      mensaje: form.mensaje.value
+    };
+
+    emailjs.send("service_x491gbm", "template_6oi2z9l", data)
+      .then(function(){
+
+        document.getElementById("msg").style.display = "block";
+        form.reset();
+
+        btn.innerText = "Enviar solicitud";
+        btn.disabled = false;
+
+      }, function(error){
+        alert("Error al enviar 😓");
+        console.log(error);
+
+        btn.innerText = "Enviar solicitud";
+        btn.disabled = false;
+      });
+
+  });
+
+});
+</script>
+<footer id="contacto">
+  <div style="max-width:800px;margin:auto;text-align:center;">
+    <h2 style="margin-bottom:10px;">ProducersGo</h2>
+    <p style="margin-bottom:20px;">Sello discográfico enfocado en productores, beatmakers y DJs.</p>
+
+    <p style="margin-top:40px;font-size:14px;color:var(--gris);">
+      © 2026 ProducersGo - Todos los derechos reservados
+    </p>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,69 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Go Beats</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="login-container">
+  <div id="loginForm">
+    <h1>GO BEATS</h1>
+
+    <input type="email" id="email" placeholder="Email" required />
+    <input type="password" id="password" placeholder="Contraseña" required />
+
+    <button id="loginBtn">Entrar</button>
+
+    <p id="errorMsg" style="color: red; margin-top: 10px;"></p>
+  </div>
+</div>
+
+<script>
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorMsg = document.getElementById("errorMsg");
+
+  errorMsg.textContent = "";
+
+  if (!email || !password) {
+    errorMsg.textContent = "Completa todos los campos";
+    errorMsg.style.display = "block";
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const text = await res.text();
+
+    if (!res.ok) {
+      errorMsg.textContent = text;
+      errorMsg.style.display = "block";
+      return;
+    }
+
+    const data = JSON.parse(text);
+
+    localStorage.setItem("token", data.token);
+
+    window.location.replace("dashboard.html");
+
+  } catch (err) {
+    console.error(err);
+    errorMsg.textContent = "Error de conexión";
+    errorMsg.style.display = "block";
+  }
+});
+</script>
+
+</body>
+</html>
