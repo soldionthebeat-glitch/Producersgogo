@@ -13,17 +13,18 @@ body {
   min-height: 100vh;
 }
 
-/* Navegación */
+/* NAV */
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 16px 40px;
   background: rgba(0, 0, 0, 0.7);
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  min-height: 70px;
 }
 
 .logo {
@@ -31,21 +32,31 @@ body {
   font-size: 1.8rem;
   color: #4da6ff;
   letter-spacing: 2px;
+  white-space: nowrap;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 30px;
+  gap: 40px;
+  align-items: center;
+}
+
+.nav-links li {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .nav-links a {
   color: #e0e0e0;
   text-decoration: none;
   font-weight: 600;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .nav-links a:hover,
@@ -54,7 +65,7 @@ body {
   color: #050c18;
 }
 
-/* Contenedor principal */
+/* CONTENEDOR */
 .container {
   max-width: 1000px;
   margin: 60px auto 80px;
@@ -62,7 +73,7 @@ body {
   text-align: center;
 }
 
-/* Títulos */
+/* TITULOS */
 h1 {
   font-size: 3rem;
   font-weight: 900;
@@ -80,7 +91,7 @@ h2 {
   text-shadow: 0 0 6px #7ec0ff;
 }
 
-/* Descripción */
+/* DESCRIPCIÓN */
 .desc {
   color: #a0a0a0;
   font-size: 1.2rem;
@@ -90,10 +101,10 @@ h2 {
   margin-right: auto;
 }
 
-/* Grid de iframes */
+/* GRID (corregido → eliminé duplicado y dejé el bueno) */
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 30px;
 }
 
@@ -111,7 +122,7 @@ iframe:hover {
   box-shadow: 0 12px 30px rgba(77, 166, 255, 0.7);
 }
 
-/* Bloque de texto */
+/* BLOQUE */
 .bloque p {
   font-size: 1.15rem;
   max-width: 700px;
@@ -120,29 +131,7 @@ iframe:hover {
   line-height: 1.7;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-
-  .nav {
-    padding: 15px 20px;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-  }
-
-  h2 {
-    font-size: 1.7rem;
-  }
-
-  .desc {
-    font-size: 1rem;
-  }
-}
-
+/* TESTIMONIOS */
 .testimonios {
   margin-top: 60px;
   max-width: 700px;
@@ -155,7 +144,6 @@ iframe:hover {
 .testimonios h2 {
   color: #7ec0ff;
   margin-bottom: 20px;
-  text-shadow: 0 0 6px #7ec0ff;
 }
 
 .testimonios blockquote {
@@ -165,15 +153,9 @@ iframe:hover {
   margin-bottom: 25px;
   font-style: italic;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(77, 166, 255, 0.15);
 }
 
-.testimonios footer {
-  margin-top: 10px;
-  font-weight: 700;
-  color: #4da6ff;
-}
-
+/* CONTACTO */
 .contact-cta {
   margin-top: 60px;
   background: rgba(77, 166, 255, 0.15);
@@ -182,57 +164,10 @@ iframe:hover {
   max-width: 700px;
   margin-left: auto;
   margin-right: auto;
-  color: #e0e0e0;
   text-align: center;
 }
 
-.contact-cta h2 {
-  margin-bottom: 15px;
-  color: #4da6ff;
-  text-shadow: 0 0 8px #4da6ff;
-}
-
-.contact-cta p {
-  font-size: 1.1rem;
-}
-
-.btn-link {
-  color: #4da6ff;
-  font-weight: 700;
-  text-decoration: none;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.3s ease;
-}
-
-.btn-link:hover {
-  border-color: #4da6ff;
-}
-
-.youtube-trabajos {
-  max-width: 1000px;
-  margin: 60px auto;
-  padding: 0 20px;
-  color: #d0d0d0;
-}
-
-.youtube-trabajos h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #4da6ff;
-  margin-bottom: 15px;
-  text-shadow: 0 0 8px #4da6ff;
-  text-align: center;
-}
-
-.youtube-trabajos p {
-  font-size: 1.2rem;
-  margin-bottom: 40px;
-  text-align: center;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
+/* YOUTUBE */
 .youtube-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -243,67 +178,72 @@ iframe:hover {
   width: 100%;
   height: 280px;
   border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(77, 166, 255, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.video-item iframe:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 30px rgba(77, 166, 255, 0.7);
 }
 
 .video-item h3 {
   margin-top: 15px;
   color: #7ec0ff;
-  font-weight: 700;
-  font-size: 1.3rem;
 }
 
-.video-item p {
-  margin-top: 10px;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #b0c0ff;
-}
+/* ===================== */
+/* 🔥 FIX MOBILE */
+/* ===================== */
 
-/* Responsive */
 @media (max-width: 768px) {
+
+  /* NAV FIX */
+  .nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    min-height: auto;
+    gap: 12px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-links li {
+    height: auto;
+  }
+
+  .nav-links a {
+    display: inline-block;
+    width: auto;
+    padding: 8px 12px;
+  }
+
+  /* TEXTOS */
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .desc {
+    font-size: 1rem;
+  }
+
+  /* IFRAME FIX */
+  iframe {
+    height: 220px;
+  }
+
+  /* YOUTUBE */
   .youtube-grid {
     grid-template-columns: 1fr;
   }
 }
-
-
-/* Grid de iframes */
-.grid {
-  display: grid;
-  /* Permite que los elementos se ajusten automáticamente en columnas,
-     con un ancho mínimo de 280px y un máximo de 1fr (igual espacio disponible) */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 30px;
-}
-
-iframe {
-  width: 100%;
-  height: 280px; /* Mantengo la altura, pero puedes ajustarla si lo ves necesario */
-  border: none;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(77, 166, 255, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-iframe:hover {
-  transform: scale(1.03);
-  box-shadow: 0 12px 30px rgba(77, 166, 255, 0.7);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .grid {
-    /* En pantallas más pequeñas, una sola columna para que los iframes no se achiquen demasiado */
-    grid-template-columns: 1fr;
-  }
-  /* ... el resto de tus estilos responsive ... */
-}
-
-

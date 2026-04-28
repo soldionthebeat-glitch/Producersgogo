@@ -27,12 +27,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 40px;
+  padding: 16px 40px;
   background: rgba(0, 0, 0, 0.7);
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  min-height: 70px;
 }
 
 .logo {
@@ -40,21 +41,32 @@ body {
   font-size: 1.8rem;
   color: var(--brand);
   letter-spacing: 2px;
+  white-space: nowrap;
 }
 
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 30px;
+  gap: 40px;
+  align-items: center;
+}
+
+.nav-links li {
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .nav-links a {
   color: var(--text);
   text-decoration: none;
   font-weight: 600;
-  padding: 6px 10px;
+  padding: 8px 12px;
   border-radius: 6px;
   transition: background-color 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
 }
 
 .nav-links a:hover,
@@ -172,14 +184,51 @@ h2 {
 /* Responsive */
 
 @media (max-width: 768px) {
+  /* NAV FIX */
+  .nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    min-height: auto;
+    gap: 12px;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    text-align: center;
+    width: 100%;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-links li {
+    height: auto;
+  }
+
+  .nav-links a {
+    display: inline-block;
+    width: auto;
+    padding: 8px 12px;
+  }
+
   .row {
     display: block;
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .images-column {
     display: block;
     height: auto;
     margin-bottom: 20px;
+    text-align: center;
   }
 
   .images-column img {
@@ -188,11 +237,48 @@ h2 {
     flex-grow: 0;
     flex-shrink: 0;
     flex-basis: auto;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
   }
 
   .text-improved {
     width: 100%;
     font-size: 1rem;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .text-improved p {
+    text-align: center;
+  }
+
+  .text-improved ul {
+    margin-left: auto;
+    margin-right: auto;
+    display: inline-block;
+    text-align: left;
+  }
+
+  .text-improved blockquote {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .bloque {
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .bloque p {
+    text-align: center;
+  }
+
+  .bloque h3 {
     text-align: center;
   }
 }
@@ -476,15 +562,111 @@ h2 {
 
 /* Responsive: apilar en pantallas pequeñas */
 @media (max-width: 768px) {
-  .dynamic-content {
+
+  /* NAV FIX */
+  .nav {
     flex-direction: column;
-    max-width: 100%; /* Para que ocupe todo el ancho en móvil */
-    margin: 0 10px; /* Un poco de margen lateral */
+    align-items: center;
+    padding: 12px 20px;
+    min-height: auto;
+    gap: 12px;
   }
 
-  .images-column,
-  .text-improved {
-    flex: none;
+  .logo {
+    font-size: 1.5rem;
+    text-align: center;
     width: 100%;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .nav-links li {
+    height: auto;
+  }
+
+  .nav-links a {
+    display: inline-block;
+    width: auto;
+    padding: 8px 12px;
+  }
+
+  /* TEXTOS */
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .desc {
+    font-size: 1rem;
+  }
+
+  /* IFRAME FIX */
+  iframe {
+    height: 220px;
+  }
+
+  /* YOUTUBE */
+  .youtube-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* ========================================= */
+/* 🔥 FIX REAL: SOLO CENTRAR IMÁGENES MOBILE */
+/* ========================================= */
+
+@media (max-width: 768px) {
+
+  /* NO tocamos nav, títulos, colores, nada */
+
+  /* SOLO esta sección */
+  .row {
+    display: block;
+    text-align: center;
+  }
+
+  .images-column {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center; /* centra horizontal */
+  }
+
+  .images-column img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 320px;
+  }
+
+  /* Galería centrada */
+  .gallery__grid {
+    justify-items: center;
+  }
+
+  .gallery__item img {
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 320px;
+  }
+
+  /* Certificados centrados SIN romper grid */
+  .certs__grid {
+    justify-items: center;
+  }
+
+  .cert__image {
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
   }
 }
