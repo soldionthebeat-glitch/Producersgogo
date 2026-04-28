@@ -1140,9 +1140,92 @@ body {
 }
 .bg-anim {
   background:
-    radial-gradient(circle at 20% 30%, rgba(74,122,199,0.25), transparent 50%),
+    radial-gradient(circle at 20% 30%, rgba(199, 195, 74, 0.25), transparent 50%),
     radial-gradient(circle at 80% 70%, rgba(58,95,138,0.20), transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05), transparent 60%);
+    radial-gradient(circle at 50% 50%, rgba(255, 0, 0, 0.05), transparent 60%);
   
   animation: moveBg 10s ease-in-out infinite alternate;
+}
+
+/* =========================
+   LOGO DE FONDO 🔥
+=========================*/
+.logo-bg{
+  position:absolute;
+  top:50%;
+  left:50%;
+
+  transform:translate(-50%, -50%);
+  
+  width:600px; /* tamaño */
+  max-width:90%;
+
+  opacity:0.07; /* 🔥 súper sutil */
+  pointer-events:none;
+
+  filter:
+    drop-shadow(0 0 40px rgba(74,122,199,0.5))
+    blur(1px);
+
+  z-index:0;
+
+  animation:floatLogo 6s ease-in-out infinite alternate;
+}
+
+/* animación flotante */
+@keyframes floatLogo{
+  from{
+    transform:translate(-50%, -55%) scale(1);
+  }
+  to{
+    transform:translate(-50%, -45%) scale(1.05);
+  }
+}
+/* =========================
+   LOGO 3D PRO 🔥
+=========================*/
+.logo-3d{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  
+  perspective:1200px;
+  z-index:0;
+}
+
+/* LOGO */
+.logo-3d img{
+  width:650px;
+  max-width:90%;
+
+  opacity:0.12;
+
+  transform-style:preserve-3d;
+  transform:rotateX(0deg) rotateY(0deg) scale(1);
+
+  transition:transform 0.15s ease-out;
+
+  /* 🔥 glow PRO */
+  filter:
+    drop-shadow(0 0 30px rgba(74,122,199,0.7))
+    drop-shadow(0 0 80px rgba(74,122,199,0.5))
+    drop-shadow(0 0 120px rgba(74,122,199,0.3));
+}
+
+/* CAPA EXTRA DE LUZ */
+.logo-3d::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:500px;
+  height:500px;
+
+  transform:translate(-50%, -50%);
+  
+  background:radial-gradient(circle, rgba(74,122,199,0.25), transparent 70%);
+  filter:blur(40px);
+
+  z-index:-1;
 }
