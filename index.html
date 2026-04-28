@@ -44,6 +44,9 @@
   <!-- HERO -->
   <section class="hero" id="inicio">
   
+    <div class="logo-3d">
+  <img src="/Fontend/img/logo png prooooo.png" alt="ProducersGo Logo">
+</div>
 
     <div class="hero-overlay"></div>
 
@@ -388,6 +391,21 @@
       }, { passive: true });
     }
   </script>
+
+  <script>
+const logo = document.querySelector(".logo-3d img");
+
+document.addEventListener("mousemove", (e) => {
+  const x = (window.innerWidth / 2 - e.clientX) / 25;
+  const y = (window.innerHeight / 2 - e.clientY) / 25;
+
+  logo.style.transform = `
+    rotateY(${x}deg)
+    rotateX(${y}deg)
+    scale(1.05)
+  `;
+});
+</script>
 
   <!-- Modal y Reproductor Scripts -->
   <script src="assets/modal-obtener.js"></script>
