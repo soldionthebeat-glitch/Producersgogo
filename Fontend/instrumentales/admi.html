@@ -335,10 +335,45 @@
       }
     });
 
-    clearBtn.addEventListener("click", () => {
-      form.reset();
-      statusBox.className = "status";
-      statusBox.textContent = "";
+    clearBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value.trim().toLowerCase();
+      
+      if (!email) {
+        showStatus("Ingresa un email para eliminar el usuario.", "error");
+        return;
+      }
+
+      const confirm = window.confirm(`¿Estás seguro de que deseas eliminar al usuario ${email}?`);
+      if (!confirm) return;
+
+      clearBtn.disabled = true;
+      clearBtn.textContent = "Eliminando...";
+
+      try {
+        const res = await fetch(`${API_URL}/admin/users/delete`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token()
+          },
+          body: JSON.stringify({ email })
+        });
+
+        const text = await res.text();
+        if (!res.ok) {
+          showStatus(text || "No se pudo eliminar el usuario.", "error");
+          return;
+        }
+
+        showStatus(`Usuario ${email} eliminado exitosamente.`, "ok");
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showStatus("Error de conexión con el backend.", "error");
+      } finally {
+        clearBtn.disabled = false;
+        clearBtn.textContent = "Limpiar";
+      }
     });
 
     validarAdmin();
