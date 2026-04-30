@@ -4,16 +4,54 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Go Beats - Home</title>
+  <link rel="stylesheet" href="cssz/dashboard.css" />
+  <link rel="stylesheet" href="../assets/modal-obtener.css" />
+  <link rel="stylesheet" href="../assets/reproductor-beats.css" />
+  <link rel="icon" href="/Fontend/img/logo de pestana .png">
 </head>
 <body>
 
-<h1>Go Beats</h1>
-<p id="userBadge"></p>
-<button id="logoutBtn">Cerrar sesión</button>
+<div class="layout">
+  <aside class="sidebar active" id="sidebar">
+    <button id="sidebarHandle" class="sidebar-handle" type="button">☰</button>
 
-<hr>
+    <div class="brand-block">
+      <span class="brand-mark">GB</span>
+      <div>
+        <h2>Go Beats</h2>
+        <p>Catálogo general</p>
+      </div>
+    </div>
 
-<div id="beats-container"></div>
+    <nav class="side-nav">
+      <a href="home.html" class="active">🏠 Explorer</a>
+      <a href="dashboard.html">🎧 Mis Beats</a>
+      <a href="subirbeats.html">⭐ Destacados / Subir</a>
+      <a href="admin-descargas.html" class="admin-only hidden">📥 Quién descargó</a>
+      <a href="admi.html" class="admin-only hidden">🛠️ Admi HTML</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <button id="toggleSidebar">☰</button>
+      <div>
+        <h1>Todos los beats</h1>
+      </div>
+      <div>
+        <span id="userBadge">Cargando...</span>
+        <button id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <section>
+      <input id="searchInput" placeholder="Buscar..." />
+    </section>
+
+    <div id="beats-status">Cargando beats...</div>
+    <div id="beats-container"></div>
+  </main>
+</div>
 
 <script>
 const API_URL = "https://backend-j3sk.onrender.com";
@@ -29,7 +67,7 @@ function authHeaders() {
   return { Authorization: "Bearer " + token() };
 }
 
-// 🔐 PROTEGER
+// 🔐 proteger
 async function proteger() {
   if (!token()) {
     window.location = "index.html";
@@ -45,7 +83,7 @@ async function proteger() {
       : usuarioActual.email;
 }
 
-// 🎨 RENDER
+// 🎨 render
 function renderBeats() {
   const container = document.getElementById("beats-container");
 
@@ -78,7 +116,7 @@ function renderBeats() {
   }).join("");
 }
 
-// 📥 CARGAR
+// 📥 cargar
 async function cargarBeats() {
   const res = await fetch(`${API_URL}/all-beats`, {
     headers: authHeaders()
@@ -88,7 +126,7 @@ async function cargarBeats() {
   renderBeats();
 }
 
-// 🔥 TOMAR BEAT
+// 🔥 tomar beat
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".btn-obtener");
   if (!btn) return;
@@ -123,7 +161,6 @@ document.addEventListener("click", async (e) => {
     link.click();
 
     alert("Beat tomado 🔥");
-
     cargarBeats();
 
   } catch (err) {
@@ -132,7 +169,7 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// 🗑 ELIMINAR BEAT (ADMIN)
+// 🗑 eliminar beat
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".btn-delete");
   if (!btn) return;
@@ -155,7 +192,6 @@ document.addEventListener("click", async (e) => {
     }
 
     alert("Beat eliminado 🗑");
-
     cargarBeats();
 
   } catch (err) {
@@ -164,13 +200,13 @@ document.addEventListener("click", async (e) => {
   }
 });
 
-// 🚪 LOGOUT
+// logout
 document.getElementById("logoutBtn").onclick = () => {
   localStorage.removeItem("token");
   window.location = "index.html";
 };
 
-// INIT
+// init
 (async () => {
   await proteger();
   await cargarBeats();
