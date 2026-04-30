@@ -13,7 +13,7 @@
 
 <div class="layout">
   <aside class="sidebar active" id="sidebar">
-    <button id="sidebarHandle" class="sidebar-handle" type="button">☰</button>
+    <button id="sidebarHandle" class="sidebar-handle" type="button" aria-label="Abrir menu">☰</button>
 
     <div class="brand-block">
       <span class="brand-mark">GB</span>
@@ -30,146 +30,279 @@
       <a href="admin-descargas.html" class="admin-only hidden">📥 Quién descargó</a>
       <a href="admi.html" class="admin-only hidden">🛠️ Admi HTML</a>
     </nav>
+
   </aside>
 
-  <main class="main">
+  <main class="main" id="main">
     <header class="header">
-      <button id="toggleSidebar">☰</button>
+      <button id="toggleSidebar" type="button" aria-label="Abrir menu">☰</button>
       <div>
+        <p class="eyebrow">Explorer</p>
         <h1>Todos los beats</h1>
       </div>
-      <div>
-        <span id="userBadge">Cargando...</span>
-        <button id="logoutBtn">Cerrar sesión</button>
+      <div class="header-actions">
+        <span id="userBadge" class="user-badge">Cargando...</span>
+        <button id="logoutBtn" type="button">Cerrar sesión</button>
       </div>
     </header>
 
-    <section>
-      <input id="searchInput" placeholder="Buscar..." />
+    <section class="hero-panel">
+      <div>
+        <p class="eyebrow">Vista general</p>
+        <h2>Catálogo completo del sello</h2>
+        <p>Aquí aparecen todos los beats: disponibles y también los que ya fueron tomados por productores.</p>
+      </div>
+      <div class="hero-stat">
+        <strong id="beatCount">0</strong>
+        <span>beats totales</span>
+      </div>
     </section>
 
-    <div id="beats-status">Cargando beats...</div>
-    <div id="beats-container"></div>
+    <section class="filters-panel" aria-label="Filtros de beats">
+      <div class="search-box">
+        <label for="searchInput">Buscar</label>
+        <input id="searchInput" type="search" placeholder="Nombre, productor, estilo..." />
+      </div>
+    </section>
+
+    <section class="beats-section">
+      <div class="section-title">
+        <div>
+          <p class="eyebrow">General</p>
+          <h2>Beats del sello</h2>
+        </div>
+      </div>
+
+      <div id="beats-status" class="status">Cargando beats...</div>
+      <div id="beats-container" class="beats-grid explorer-grid"></div>
+    </section>
   </main>
 </div>
 
+<script src="../assets/modal-obtener.js"></script>
 <script>
 const API_URL = "https://backend-j3sk.onrender.com";
+const sidebar = document.getElementById("sidebar");
+const statusBox = document.getElementById("beats-status");
+const beatsContainer = document.getElementById("beats-container");
+const userBadge = document.getElementById("userBadge");
+const beatCount = document.getElementById("beatCount");
+const searchInput = document.getElementById("searchInput");
 
 let usuarioActual = null;
 let beatsGlobal = [];
+let currentPreviewAudio = null;
+let currentPreviewBtn = null;
+
+document.getElementById("toggleSidebar").onclick = () => sidebar.classList.toggle("active");
+document.getElementById("sidebarHandle").onclick = () => sidebar.classList.toggle("active");
 
 function token() {
   return localStorage.getItem("token");
 }
 
-function authHeaders() {
-  return { Authorization: "Bearer " + token() };
+function authHeaders(extra = {}) {
+  return { ...extra, Authorization: "Bearer " + token() };
 }
 
-// 🔐 proteger
-async function proteger() {
-  if (!token()) {
-    window.location = "index.html";
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildAssetUrl(path) {
+  if (!path) return "";
+  let value = String(path).replaceAll("\\", "/");
+  try {
+    value = decodeURIComponent(value);
+  } catch {}
+  value = value.replace(/uploadsaudio[\u0000-\u001f\u007f]*/i, "uploads/audio/");
+  value = value.replace(/uploadsimages[\u0000-\u001f\u007f]*/i, "uploads/images/");
+  return value.startsWith("http") ? value : `${API_URL}/${value.replace(/^\/+/, "")}`;
+}
+
+function normalize(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function stopPreview() {
+  if (currentPreviewAudio) {
+    currentPreviewAudio.pause();
+    currentPreviewAudio.currentTime = 0;
+    currentPreviewAudio = null;
+  }
+  if (currentPreviewBtn) {
+    currentPreviewBtn.textContent = "▶️ Reproducir";
+    currentPreviewBtn = null;
+  }
+}
+
+function togglePreview(audioUrl, btn) {
+  if (!audioUrl) return;
+
+  if (currentPreviewAudio && currentPreviewBtn === btn && !currentPreviewAudio.paused) {
+    currentPreviewAudio.pause();
+    btn.textContent = "▶️ Reproducir";
     return;
   }
 
-  const res = await fetch(`${API_URL}/me`, { headers: authHeaders() });
-  usuarioActual = await res.json();
+  if (!currentPreviewAudio || currentPreviewAudio.src !== audioUrl) {
+    stopPreview();
+    currentPreviewAudio = new Audio(audioUrl);
+    currentPreviewAudio.onended = () => {
+      if (currentPreviewBtn) currentPreviewBtn.textContent = "▶️ Reproducir";
+      currentPreviewAudio = null;
+      currentPreviewBtn = null;
+    };
+  }
 
-  document.getElementById("userBadge").textContent =
-    usuarioActual.role === "admin"
-      ? "ADMIN: " + usuarioActual.email
-      : usuarioActual.email;
+  currentPreviewAudio.play().then(() => {
+    btn.textContent = "⏸️ Pausar";
+    currentPreviewBtn = btn;
+  }).catch(() => {
+    stopPreview();
+  });
 }
 
-// 🎨 render
-function renderBeats() {
-  const container = document.getElementById("beats-container");
+function togglePreviewFromBtn(btn) {
+  const audioUrl = btn.dataset.audio || "";
+  togglePreview(audioUrl, btn);
+}
 
-  container.innerHTML = beatsGlobal.map(beat => {
-    const isTaken = beat.assigned;
-    const isAdmin = usuarioActual.role === "admin";
+async function proteger() {
+  if (!token()) {
+    window.location.replace("index.html");
+    return false;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/me`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("Sesión inválida");
+
+    usuarioActual = await res.json();
+    userBadge.textContent = usuarioActual.role === "admin" ? `Admin: ${usuarioActual.email}` : `User: ${usuarioActual.email}`;
+    document.body.dataset.role = usuarioActual.role;
+
+    if (usuarioActual.role === "admin") {
+      document.querySelectorAll(".admin-only").forEach((el) => el.classList.remove("hidden"));
+    }
+
+    return true;
+  } catch {
+    localStorage.removeItem("token");
+    window.location.replace("index.html");
+    return false;
+  }
+}
+
+function renderBeats() {
+  const query = normalize(searchInput.value);
+  const visibles = beatsGlobal.filter((beat) => {
+    const text = normalize(`${beat.name} ${beat.producer} ${beat.genre} ${beat.mood} ${beat.key} ${beat.assignedTo}`);
+    return !query || text.includes(query);
+  });
+
+  beatCount.textContent = visibles.length;
+
+  if (!visibles.length) {
+    beatsContainer.innerHTML = "";
+    statusBox.textContent = "No hay beats para mostrar.";
+    return;
+  }
+
+  statusBox.textContent = "";
+  beatsContainer.innerHTML = visibles.map((beat) => {
+    const cover = buildAssetUrl(beat.coverUrl);
+    const audio = buildAssetUrl(beat.fileUrl);
+    const isTaken = Boolean(beat.assigned);
 
     return `
-      <div style="border:1px solid #333;padding:10px;margin:10px;">
-        <h3>${beat.name}</h3>
-        <p>${beat.producer}</p>
+      <article class="beat-card explorer-card ${isTaken ? "is-taken" : ""}">
+        <div class="beat-cover explorer-cover">
+          ${cover ? `<img src="${cover}" alt="Portada de ${escapeHtml(beat.name)}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22600%22%3E%3Crect fill=%22%230a1830%22 width=%22600%22 height=%22600%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2366d9ff%22 font-size=%2232%22 font-family=%22Arial%22%3ENo Cover%3C/text%3E%3C/svg%3E'">` : ""}
+          ${isTaken ? `<span class="taken-badge">Tomado</span>` : `<span class="taken-badge available">Disponible</span>`}
+        </div>
+        <div class="beat-info explorer-info">
+          <div class="beat-heading">
+            <h3>${escapeHtml(beat.name || "Beat sin nombre")}</h3>
+            <span>${escapeHtml(beat.genre || "Beat")}</span>
+          </div>
+          <p>Prod. ${escapeHtml(beat.producer || "Desconocido")}</p>
+          ${isTaken ? `<p>Tomado por ${escapeHtml(beat.assignedTo || "productor")}</p>` : ""}
+          <div class="beat-meta">
+            <span>${beat.bpm ? escapeHtml(beat.bpm) + " BPM" : "BPM libre"}</span>
+            <span>${escapeHtml(beat.key || "Sin nota")}</span>
+            <span>${escapeHtml(beat.mood || "Sin mood definido")}</span>
+          </div>
+          ${!isTaken && audio
+            ? `<button type="button" class="play-preview-btn" data-audio="${audio}" onclick="togglePreviewFromBtn(this)">▶️ Reproducir</button>`
+            : `<p class="status">No disponible</p>`
+          }
+          <div class="beat-actions">
+  ${isTaken ? `<button type="button" disabled>No disponible</button>` : `<button class="btn-obtener ghost-button" data-beat-name="${escapeHtml(beat.name)}" data-beat-producer="${escapeHtml(beat.producer)}" data-beat-file="${escapeHtml(audio)}" data-beat-id="${beat._id || ''}">Tomar</button>`}
 
-        ${
-          isTaken
-            ? `<button disabled>No disponible</button>`
-            : `<button class="btn-obtener"
-                data-beat-id="${beat._id}"
-                data-beat-file="${beat.fileUrl}">
-                Tomar
-              </button>`
-        }
-
-        ${
-          isAdmin
-            ? `<button class="btn-delete" data-id="${beat._id}" style="margin-left:10px;">🗑 Eliminar</button>`
-            : ""
-        }
-      </div>
+  ${usuarioActual?.role === "admin"
+    ? `<button class="btn-delete ghost-button" data-id="${beat._id}">🗑</button>`
+    : ""
+  }
+          </div>
+        </div>
+      </article>
     `;
   }).join("");
 }
 
-// 📥 cargar
 async function cargarBeats() {
-  const res = await fetch(`${API_URL}/all-beats`, {
-    headers: authHeaders()
-  });
+  statusBox.textContent = "Cargando beats...";
 
-  beatsGlobal = await res.json();
-  renderBeats();
+  try {
+    const res = await fetch(`${API_URL}/all-beats`, { headers: authHeaders() });
+    if (!res.ok) throw new Error("No se pudieron cargar los beats");
+
+    beatsGlobal = await res.json();
+    renderBeats();
+  } catch (err) {
+    console.error(err);
+    statusBox.textContent = "No se pudo cargar el catálogo de beats.";
+  }
 }
 
-// 🔥 tomar beat
-document.addEventListener("click", async (e) => {
+searchInput.addEventListener("input", renderBeats);
+
+document.getElementById("logoutBtn").onclick = () => {
+  stopPreview();
+  localStorage.removeItem("token");
+  window.location.replace("index.html");
+};
+
+(async () => {
+  const ok = await proteger();
+  if (ok) cargarBeats();
+})();
+</script>
+<script>
+// Abrir modal para tomar beat
+document.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn-obtener");
   if (!btn) return;
 
-  const beatId = btn.dataset.beatId;
-  const fileUrl = btn.dataset.beatFile;
+  const beatInfo = {
+    id: btn.dataset.beatId,
+    name: btn.dataset.beatName,
+    producer: btn.dataset.beatProducer,
+    fileUrl: btn.dataset.beatFile
+  };
 
-  try {
-    const res = await fetch(`${API_URL}/beats/take/${beatId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token()
-      },
-      body: JSON.stringify({
-        name: usuarioActual.email.split("@")[0],
-        email: usuarioActual.email
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data || "Error al tomar beat");
-      return;
-    }
-
-    // descarga
-    const link = document.createElement("a");
-    link.href = fileUrl;
-    link.download = "";
-    link.click();
-
-    alert("Beat tomado 🔥");
-    cargarBeats();
-
-  } catch (err) {
-    console.error(err);
-    alert("Error de conexión");
+  // Mostrar modal
+  if (window.modalObtener) {
+    window.modalObtener.open(beatInfo);
   }
 });
 
-// 🗑 eliminar beat
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".btn-delete");
   if (!btn) return;
@@ -182,7 +315,7 @@ document.addEventListener("click", async (e) => {
     const res = await fetch(`${API_URL}/beats/${id}`, {
       method: "DELETE",
       headers: {
-        "Authorization": "Bearer " + token()
+        "Authorization": "Bearer " + localStorage.getItem("token")
       }
     });
 
@@ -191,7 +324,6 @@ document.addEventListener("click", async (e) => {
       return;
     }
 
-    alert("Beat eliminado 🗑");
     cargarBeats();
 
   } catch (err) {
@@ -199,18 +331,6 @@ document.addEventListener("click", async (e) => {
     alert("Error del servidor");
   }
 });
-
-// logout
-document.getElementById("logoutBtn").onclick = () => {
-  localStorage.removeItem("token");
-  window.location = "index.html";
-};
-
-// init
-(async () => {
-  await proteger();
-  await cargarBeats();
-})();
 </script>
 
 </body>
